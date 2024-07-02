@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en" translate="no">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Jam Digital</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap"
+      rel="stylesheet" />
+    <style>
+      body {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+        font-weight: bold;
+        font-family: "Roboto", sans-serif;
+        transition: background-color 0.5s, color 0.5s;
+      }
+
+      #jam {
+        font-size: 10vw; /* Adjust the font size based on viewport width */
+      }
+
+      .dark-mode {
+        background-color: #000;
+        color: #fff;
+      }
+
+      .light-mode {
+        background-color: #fff;
+        color: #000;
+      }
+
+      @media (max-width: 768px) {
+        #jam {
+          font-size: 15vw; /* Larger font size for smaller screens */
+        }
+      }
+
+      @media (max-width: 480px) {
+        #jam {
+          font-size: 20vw; /* Even larger font size for very small screens */
+        }
+      }
+
+      .button-container {
+        display: flex;
+        gap: 10px;
+        margin-top: 20px;
+      }
+
+      .mode-toggle,
+      .fullscreen-toggle {
+        padding: 10px 20px;
+        cursor: pointer;
+        background-color: #ccc;
+        border: none;
+        border-radius: 5px;
+      }
+    </style>
+  </head>
+  <body class="dark-mode">
+    <div id="jam"></div>
+    <div class="button-container">
+      <button class="mode-toggle" onclick="toggleMode()">Toggle Mode</button>
+      <button class="fullscreen-toggle" onclick="toggleFullscreen()">
+        Fullscreen
+      </button>
+    </div>
+    <script>
+      let wakeLock = null;
+
+      async function requestWakeLock() {
+        try {
+          wakeLock = await navigator.wakeLock.request("screen");
+          wakeLock.addEventListener("release", () => {
+            console.log("Wake Lock was released");
+          });
+          console.log("Wake Lock is active");
+        } catch (err) {
+          console.error(`${err.name}, ${err.message}`);
+        }
+      }
+
+      function updateTime() {
+        const sekarang = new Date();
+        const jam = String(sekarang.getHours()).padStart(2, "0");
+        const menit = String(sekarang.getMinutes()).padStart(2, "0");
+        const detik = String(sekarang.getSeconds()).padStart(2, "0");
+        document.getElementById("jam").textContent = `${jam}:${menit}:${detik}`;
+      }
+
+      function toggleMode() {
+        const body = document.body;
+        body.classList.toggle("dark-mode");
+        body.classList.toggle("light-mode");
+      }
+
+      function toggleFullscreen() {
+        if (!document.fullscreenElement) {
+          document.documentElement.requestFullscreen().then(() => {
+            requestWakeLock();
+          });
+        } else {
+          if (document.exitFullscreen) {
+            document.exitFullscreen();
+            if (wakeLock !== null) {
+              wakeLock.release().then(() => {
+                wakeLock = null;
+              });
+            }
+          }
+        }
+      }
+
+      setInterval(updateTime, 1000);
+      updateTime(); // Initialize immediately
+    </script>
+  </body>
+</html>
